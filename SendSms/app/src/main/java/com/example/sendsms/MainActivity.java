@@ -114,6 +114,20 @@ class DoBackgroundTask extends AsyncTask<String, Void, Void>
 
     @Override
     protected Void doInBackground(String... voids){
+        //Tcp
+        String message = voids[0];
+        try{
+            s= new Socket("192.168.1.62",9090);
+            writer = new PrintWriter(s.getOutputStream());
+            writer.write(message);
+            writer.flush();
+            writer.close();
+            s.close();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         
 
         //Aquí UDP
