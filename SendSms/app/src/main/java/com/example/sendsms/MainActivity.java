@@ -21,6 +21,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+import android.os.AsyncTask;
+
 public class MainActivity extends AppCompatActivity {
 
     //Instanciacion
@@ -79,23 +90,55 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                try{
-                    SmsManager smsManager = SmsManager.getDefault();
-                    smsManager.sendTextMessage(etCel.getText().toString(), null, tvLocation.getText().toString(), null, null);
-                    Toast.makeText(getApplicationContext(),"Mensaje enviado con éxito!",Toast.LENGTH_LONG).show();
-                }catch(Exception e){
-                    if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, 1);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Se debe ingresar el número de telefono", Toast.LENGTH_LONG).show();
-                    }
-                }
+                String message=tvLocation.getText().toString();
+
+                DoBackgroundTask b1 = new DoBackgroundTask();
+                b1.execute(message);
 
             }
         });
 
     }
+public void send_data(View v){
+        String message=tvLocation.getText().toString();
 
+        DoBackgroundTask b1 = new DoBackgroundTask();
+        b1.execute(message);
+
+
+}
+
+class DoBackgroundTask extends AsyncTask<String, Void, Void>
+{     Socket s;
+     PrintWriter writer;
+
+    @Override
+    protected Void doInBackground(String... voids){
+        
+
+        //Aquí UDP
+        try {
+            String messageStr = voids[0];
+            int server_port = 9090;
+            InetAddress local = InetAddress.getByName("192.168.1.62");
+            int msg_length = messageStr.length();
+            byte[] messageu = messageStr.getBytes();
+
+
+            DatagramSocket su = new DatagramSocket();
+            //
+
+            DatagramPacket p = new DatagramPacket(messageu, msg_length, local, server_port);
+            su.send(p);//properly able to send data. i receive data to server
+        } catch (SocketException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+}
 
 
 }
